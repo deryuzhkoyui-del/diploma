@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f5f7f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #fafafa;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            color: #8c8c8c;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: #1890ff;
+            border-bottom: 2px solid #1890ff;
+            background-color: #ffffff;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #434343;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 40px 10px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: #40a9ff;
+        }
+
+        /* Ссылка справа */
+        .forgot-password-container {
+            display: flex;
+            justify-content: flex-end; 
+            margin-bottom: 20px;
+        }
+
+        .forgot-link {
+            font-size: 13px;
+            color: #1890ff;
+            text-decoration: none;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Иконка глаза */
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 33px;
+            cursor: pointer;
+            color: #bfbfbf;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #8c8c8c;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #40a9ff;
+        }
+
+        .warning-text {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #ff4d4f;
+            text-align: center;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="tabs">
+        <div id="student-tab" class="tab active" onclick="switchTab('student')">Вход для ученика</div>
+        <div id="teacher-tab" class="tab" onclick="switchTab('teacher')">Вход для учителя</div>
+    </div>
+
+    <div class="form-container">
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Почта</label>
+                <input type="email" placeholder="example@mail.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="password" required>
+                <div class="password-toggle" onclick="togglePassword()">
+                    <!-- Иконка ЗАКРЫТОГО глаза (по умолчанию) -->
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path>
+                        <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path>
+                        <path d="M1 1l22 22"></path> <!-- Это перечеркивание, сейчас заменим в скрипте на веко -->
+                    </svg>
+                </div>
+            </div>
+
+            <div class="forgot-password-container">
+                <a href="#" class="forgot-link">Забыл пароль?</a>
+            </div>
+
+            <button type="submit" class="btn-submit">Войти</button>
+        </form>
+
+        <p id="warning-text" class="warning-text">
+            Если Вы не зарегистрированы в системе, попросите Вашего учителя создать для Вас учетную запись
+        </p>
+    </div>
+</div>
+
+<script>
+    const closedEyeSvg = `
+        <path d="M2 12s3-7 10-7 10 7 10 7"></path>
+        <path d="M5 15l-2 3"></path>
+        <path d="M9 18l-0.5 3"></path>
+        <path d="M15 18l0.5 3"></path>
+        <path d="M19 15l2 3"></path>
+    `;
+
+    const openEyeSvg = `
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+    `;
+
+    // Устанавливаем иконку закрытого глаза при загрузке
+    document.getElementById('eye-icon').innerHTML = closedEyeSvg;
+
+    function switchTab(role) {
+        const studentTab = document.getElementById('student-tab');
+        const teacherTab = document.getElementById('teacher-tab');
+        const warningText = document.getElementById('warning-text');
+
+        studentTab.classList.remove('active');
+        teacherTab.classList.remove('active');
+
+        if (role === 'student') {
+            studentTab.classList.add('active');
+            warningText.innerText = "Если Вы не зарегистрированы в системе, попросите Вашего учителя создать для Вас учетную запись";
+        } else {
+            teacherTab.classList.add('active');
+            warningText.innerText = "Если Вы не зарегистрированы в системе, попросите администратора создать для Вас учетную запись";
+        }
+    }
+
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.innerHTML = openEyeSvg;
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.innerHTML = closedEyeSvg;
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Форма отправлена');
+    });
+</script>
+
+</body>
+</html>
